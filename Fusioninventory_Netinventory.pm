@@ -1,4 +1,4 @@
-package Dmidecode;
+package Fusioninventory_Netinventory;
 
 use strict;
 use Carp;
@@ -48,32 +48,16 @@ sub flatten() {
 	my(%res) = ();
 	my(%key) = ();
 	foreach ( @arr ) {
-		if ( m/^\w+/ ) {
-			$key = $_;
-			$key =~ s/^\s+//;
-			$subkey = "";
-			next;
-		}
-		elsif ( m/(.*):$/ ) {
-			$subkey = $1;
-			$subkey =~ s/^\s+//;
-			next;
-		}
-		elsif ( m/:/ ) {
-			my($skey,$sval) = split(/:/,$_);
-			s/\s+//;
-			my($bepa) = $key . " " . $subkey . " " . $skey;
-			$bepa =~ s/\s+/./g;
-			$bepa = lc($bepa);
-			if ( $res{$bepa} ) {
-				my($i) = $key{$bepa};
-				$i++;
-				$key{$bepa}=$i;
-				$bepa = $bepa . "." . $i;
+		# <IFMTU>9216</IFMTU>
+		#if ( m/\<(\w+)\>(.*)\</\w+\>/ ) {
+		if ( m/\<(\w+)\>/ ) {
+			my($key) = $1;
+			if ( m/\<$key\>(.*)\<\/$key\>/ ) {
+				print lc($key) . ": $1\n";
 			}
-			$res{$bepa} = $sval;
 		}
 	}
+	exit;
 	return(%res);
 }
 

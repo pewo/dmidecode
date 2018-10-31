@@ -12,7 +12,8 @@ my(%hash) = $obj->flatten($dmidecode);
 
 #my(%keys) = $obj->findkeys(\%hash,"onboard.device.reference.designation");
 
-my(%keys) = $obj->findkeys(\%hash,".");
-foreach ( sort keys %keys ) {
-	print "$_ -> $keys{$_}\n";
-}
+my($res) = $obj->getallkeys(\%hash,"onboard.device.reference");
+print $res . "\n";
+#foreach ( sort keys %keys ) {
+	#print "$_ -> $keys{$_}\n";
+#}
