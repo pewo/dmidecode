@@ -7,5 +7,6 @@ use Fusioninventory_Inventory;
 
 my($obj) = new Fusioninventory_Inventory();
 
-my(@arr) = $obj->flatten("/tmp/fusioninventory.xml");
-#print Dumper(\@arr);
+my(%hash) = $obj->xml2hash("/tmp/fusioninventory.xml");
+my(@keys) = $obj->getallkeys(\%hash,"networks.macaddr");
+print Dumper(\@keys);

@@ -4,43 +4,46 @@ use strict;
 use XML::Parser;
 use Data::Dumper;
 
-my $parser = new XML::Parser( Handlers => {
-		Start => \&hdl_start,
-		End => \&hdl_end,
-		Char => \&hdl_char,
-		Default => \&hdl_default,
-	}
-);
+my(%hash);
 
-$parser->parsefile("/tmp/fusioninventory.xml");
+sub xml2hash() {
 
-sub hdl_start {
-	my($p, $elt, %attr) = @_;
-	#print "start: " . Dumper(\$elt);
-}
-sub hdl_end {
-	my($p, $elt, %attr) = @_;
-	#print "end: " . Dumper(\$elt);
-}
-sub hdl_char {
-	my($p, $elt, %attr) = @_;
-	#print "char: " . Dumper(\$p);
-	my($ap) = $p->{Context};
-	my($long) = "";
-	foreach ( @$ap ) {
-		$long .= "." . $_;
-	}
-	my($res) = $elt;
-	$res =~ s/^\s*//g;
-	$res =~ s/\s*$//g;
-	return if ( $res eq "" );
-	$long =~ s/^\.//;
-	$long = lc($long);
-	$res = lc($res);
+	my(%keys);
+	sub hdl_char {
+		my($p, $elt, %attr) = @_;
+		#print "char: " . Dumper(\$p);
+		my($ap) = $p->{Context};
+		my($long) = "";
+		foreach ( @$ap ) {
+			$long .= "." . $_;
+		}
+		my($res) = $elt;
+		$res =~ s/^\s*//g;
+		$res =~ s/\s*$//g;
+		return if ( $res eq "" );
+		$long =~ s/^\.//;
+		$long = lc($long);
+		$res = lc($res);
+		
+		my($i) = $keys{$long};
+		if ( defined($i) ) {
+			$i++;
+			$keys{$long}=$i;
+		}
+		else {
+			$i=0;
+			$keys{$long}=0;
+		}
+		$long .= ".$i";
 	
-	print "$long=$res\n";
-}
-sub hdl_default {
-	my($p, $elt, %attr) = @_;
-	#print "default: " . Dumper(\$elt);
+		$hash{$long}=$res;
+	}
+	my $parser = new XML::Parser( Handlers => {
+			Char => \&hdl_char,
+		}
+	);
+
+	$parser->parsefile("/tmp/fusioninventory.xml");
+
+	return(%hash);
 }

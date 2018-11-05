@@ -3,11 +3,12 @@ package Fusioninventory_Inventory;
 use strict;
 use Carp;
 use Data::Dumper;
+use XML::Parser;
 use lib ".";
 use Object;
 
-$Dmidecode::VERSION = '0.01';
-@Dmidecode::ISA = qw(Object);
+$Fusioninventory_Inventory::VERSION = '0.01';
+@Fusioninventory_Inventory::ISA = qw(Object);
 
 sub new {
         my $proto = shift;
@@ -38,48 +39,53 @@ sub read() {
 	return(@res);
 }
 
+{
+	my(%hash);
+	my(%keys);
 
-sub splitter() {
-	my($self) = shift;
-	my($key) = shift;
-	my($ap) = shift;
+	sub xml2hash() {
 
-	my(@res) = ();
-	my($inrec) = 0;
-	foreach ( @$ap ) {
-		print $inrec . ": " . $_ . "\n";
-		$inrec++ if ( m/\<$key\>/ );
-		next unless ( $inrec );
-		$inrec-- if ( m/\<\/$key\>/ );
-		push(@res,$_);
-	}
-}
+		%hash = ();
+		%keys = ();
 
-sub flatten() {
-	my($self) = shift;
-	my($file) = shift;
-
-	my(@arr) = $self->read($file);
-	my(@res) = $self->splitter("BIOS",\@arr);
-	exit;
-	my($key) = undef;
-	my($subkey) = undef;
-	my(%res) = ();
-	my(%key) = ();
-	foreach ( @arr ) {
-		print "$_\n";
-		next;
-		# <IFMTU>9216</IFMTU>
-		#if ( m/\<(\w+)\>(.*)\</\w+\>/ ) {
-		if ( m/\<(\w+)\>/ ) {
-			my($key) = $1;
-			if ( m/\<$key\>(.*)\<\/$key\>/ ) {
-				print lc($key) . ": $1\n";
+		sub hdl_char {
+			my($p, $elt, %attr) = @_;
+			#print "char: " . Dumper(\$p);
+			my($ap) = $p->{Context};
+			my($long) = "";
+			foreach ( @$ap ) {
+				$long .= "." . $_;
 			}
+			my($res) = $elt;
+			$res =~ s/^\s*//g;
+			$res =~ s/\s*$//g;
+			return if ( $res eq "" );
+			$long =~ s/^\.//;
+			$long = lc($long);
+			$res = lc($res);
+			
+			my($i) = $keys{$long};
+			if ( defined($i) ) {
+				$i++;
+				$keys{$long}=$i;
+			}
+			else {
+				$i=0;
+				$keys{$long}=0;
+			}
+			$long .= ".$i";
+		
+			$hash{$long}=$res;
 		}
+		my $parser = new XML::Parser( Handlers => {
+				Char => \&hdl_char,
+			}
+		);
+	
+		$parser->parsefile("/tmp/fusioninventory.xml");
+	
+		return(%hash);
 	}
-	exit;
-	return(%res);
 }
 
 sub getallkeys() {
