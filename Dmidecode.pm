@@ -4,10 +4,11 @@ use strict;
 use Carp;
 use Data::Dumper;
 use lib ".";
+use HashTools;
 use Object;
 
 $Dmidecode::VERSION = '0.01';
-@Dmidecode::ISA = qw(Object);
+@Dmidecode::ISA = qw(Object HashTools);
 
 sub new {
         my $proto = shift;
@@ -38,7 +39,7 @@ sub read() {
 	return(@res);
 }
 
-sub flatten() {
+sub dmidecode2hash() {
 	my($self) = shift;
 	my($file) = shift;
 
@@ -77,7 +78,7 @@ sub flatten() {
 	return(%res);
 }
 
-sub getallkeys() {
+sub getallkeys_nope() {
 	my($self) = shift;
 	my($hp) = shift;
 	my(@find) = @_;

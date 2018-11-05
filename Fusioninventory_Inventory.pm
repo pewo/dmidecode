@@ -5,10 +5,11 @@ use Carp;
 use Data::Dumper;
 use XML::Parser;
 use lib ".";
+use HashTools;
 use Object;
 
 $Fusioninventory_Inventory::VERSION = '0.01';
-@Fusioninventory_Inventory::ISA = qw(Object);
+@Fusioninventory_Inventory::ISA = qw(Object HashTools);
 
 sub new {
         my $proto = shift;
@@ -44,6 +45,8 @@ sub read() {
 	my(%keys);
 
 	sub xml2hash() {
+		my($self) = shift;
+		my($input) = shift;
 
 		%hash = ();
 		%keys = ();
@@ -82,13 +85,12 @@ sub read() {
 			}
 		);
 	
-		$parser->parsefile("/tmp/fusioninventory.xml");
-	
+		$parser->parsefile($input);
 		return(%hash);
 	}
 }
 
-sub getallkeys() {
+sub getallkeys_nope() {
 	my($self) = shift;
 	my($hp) = shift;
 	my(@find) = @_;

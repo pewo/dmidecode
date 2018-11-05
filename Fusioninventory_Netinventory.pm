@@ -6,8 +6,8 @@ use Data::Dumper;
 use lib ".";
 use Object;
 
-$Dmidecode::VERSION = '0.01';
-@Dmidecode::ISA = qw(Object);
+$Fusioninventory_Netinventory::VERSION = '0.01';
+@Fusioninventory_Netinventory::ISA = qw(Object);
 
 sub new {
         my $proto = shift;
