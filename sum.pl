@@ -5,10 +5,17 @@ use Data::Dumper;
 use lib ".";
 use Dmidecode;
 use Fusioninventory_Inventory;
-
-#use Fusioninventory_Netinventory;
+use Robot;
 
 my($obj);
+##################################################
+# Robot
+##################################################
+$obj = new Robot();
+print Dumper(\$obj);
+__END__
+
+
 ##################################################
 # dmidecode
 ##################################################
