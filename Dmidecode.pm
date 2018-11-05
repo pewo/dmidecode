@@ -77,27 +77,4 @@ sub dmidecode2hash() {
 	}
 	return(%res);
 }
-
-sub getallkeys_nope() {
-	my($self) = shift;
-	my($hp) = shift;
-	my(@find) = @_;
-	
-	my($res) = "";
-	my(%keys) = ();
-	my($key);
-	foreach $key ( keys %$hp ) {
-		my($value) = $hp->{$key};
-		foreach ( @find ) {
-			if ( $key =~ /$_/ ) {
-				$res .= $value . " ";
-				$keys{$key}=$value;
-			}
-		}
-	}
-	$res =~ s/^\s+//;
-	$res =~ s/\s+/ /g;
-	return($res);
-}
-
 1;
