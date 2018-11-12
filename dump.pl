@@ -4,48 +4,42 @@ use strict;
 use Data::Dumper;
 use File::Basename;
 use lib "dmidecode";
+use Dmidecode;
 use Fusioninventory_Inventory;
 use Robot;
 use Ansible;
 
-my($ansdir) = "./ansible_fact_cache";
-my($ansible) = new Ansible( dir => $ansdir );
-
 my($robdir) = "./curr";
-my($robot) = new Robot( dir => $robdir );
-
-my($se_version);
-foreach $se_version ( <$robdir/*/se_version> ) {
-	my($target) = basename(dirname($se_version));
-	print "\nse_version: $se_version, target: $target\n";
-
-	my(%inv) = $robot->inventory($target);
-	foreach ( sort keys %inv ) {
-		print "$_\t$inv{$_}\n";
-	}
-
-	(%inv) = $ansible->inventory($target);
-	foreach ( sort keys %inv ) {
-		print "$_\t$inv{$_}\n";
-	}
-}
-
-__END__
-
-
-##################################################
-# dmidecode
-##################################################
-$obj = new Dmidecode();
-{
-	my($dmidecode) = "dmidecode.txt";
-	my(%hash) = $obj->dmidecode2hash($dmidecode);
+my($ansdir) = "./ansible_fact_cache";
+my($obj);
+my($target) = shift;
 	
-	my(%keys) = $obj->getallmatchingkeys(\%hash,"onboard.device.reference");
-	foreach ( sort keys %keys ) {
-		print "$_ -> $keys{$_}\n";
+
+my(%sum) = ();
+
+##################################################
+# Robot
+##################################################
+#print "Robot Inventory\n";
+$obj = new Robot( dir => $robdir );
+{
+	my(%inv) = $obj->inventory($target);
+	foreach ( sort keys %inv ) {
+		$sum{$_}=$inv{$_};
+		print "$_\t$inv{$_}\n";
 	}
 }
+
+#print "Ansible Facts\n";
+$obj = new Ansible( dir => $ansdir );
+{
+	my(%inv) = $obj->inventory($target);
+	foreach ( sort keys %inv ) {
+		$sum{$_}=$inv{$_};
+		print "$_\t$inv{$_}\n";
+	}
+}
+__END__
 
 ##################################################
 #  Fusioninventory-inventory

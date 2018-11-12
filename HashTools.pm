@@ -74,7 +74,12 @@ sub getfirstmatchingkey() {
 	my(%keys) = $self->getallmatchingkeys($hp,@find);
 	my(@res) = sort keys %keys;
 	my($key) = shift(@res);
-	return($key, $keys{$key} );
+	if ( $key ) {
+		return($key, $keys{$key} );
+	}
+	else {
+		return(undef, undef);
+	}
 }
 
 sub getfirstmatchingkeyvalue() {

@@ -9,7 +9,8 @@ use Carp;
 
 use lib "/opt/plugins/custom";
 use Object;
-our @ISA = qw(Object);
+use HashTools;
+our @ISA = qw(Object HashTools);
 
 sub new {
 	my($self) = Object::new(@_);

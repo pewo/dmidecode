@@ -1,5 +1,3 @@
-#!/usr/bin/perl -w
-
 package Robot;
 
 use strict;
@@ -32,6 +30,15 @@ sub new {
 		#croak "$dir: $!";
 	}
         return($self);
+}
+
+sub trim() {
+	my($self) = shift;
+	my($key) = shift;
+	return(undef) unless ( defined($key) );
+	$key =~ s/^\s+//;
+	$key =~ s/\s+$//;
+	return($key);
 }
 
 sub readfile() {
@@ -71,12 +78,18 @@ sub inventory() {
 	my($manu) = undef;
 	my($serial) = undef;
 	my($completed) = 0;
+
+	my($dmidecode) = new Dmidecode();
+	my(%dmidecode) = $dmidecode->dmidecode2hash("$dir/dmidecode");
+	my(@uname) = $self->readfile("$dir/uname_-a");
 	
-	if ( ! $completed ) {
+	#
+	# model
+	#
+	if ( ! $model ) {
 		# 
 		# SPARC
 		#
-		my(@uname) = readfile("$dir/uname_-a");
 		if ( grep(/sparc/i,@uname) ) {
 			if ( $uname[0] =~ /sparc\s+(.*)$/ ) {
 				$model = $1;
@@ -84,46 +97,50 @@ sub inventory() {
 					$manu = "Sun";
 				}
 			}
-			my(@eeprom) = readfile("$dir/eeprom");
-			if ( grep(/virtual-console/i,@eeprom) ) {
-				$type = "Virtual Server";
-			}
-			else {
-				$type = "Physical Server";
-			}
-
-			if ( grep(/virtual/i,@uname) ) {
-				$type = "Virtual Server";
-			}
-			$completed = 1;
 		}
 	}
+	unless ( $model ) {
+		#
+		# Intel/DMI
+		#
+		$model = $dmidecode->getfirstmatchingkey(\%dmidecode,"system.information.product.name") unless ( $model );
+		$manu = $dmidecode->getfirstmatchingkey(\%dmidecode,"system.information.manufacturer") unless ( $manu );
+	}
 
-	if ( ! $completed ) {
-		#
-		# Dmidecode
-		#
-		my($obj) = new Dmidecode();
-		my($dmidecode) = $dir . "/dmidecode";
-		my(%dmidecode) = $obj->dmidecode2hash($dmidecode);
+
+	#
+	# Type
+	#
+	$type = "Physical Server";
+	my(@eeprom) = $self->readfile("$dir/eeprom");
+	if ( grep(/virtual-console/i,@eeprom) ) {
+		$type = "Virtual Server";
+	}
+	elsif ( grep(/virtual/i,@uname) ) {
+		$type = "Virtual Server";
+	}
+	elsif ( $model ) {
+		if ( $model =~ /vmware/i ) {
+			$type = "Virtual Server";
+		}
+	}
+		
+
 	
-		$manu = $obj->getfirstmatchingkey(\%dmidecode,"system.information.manufacturer") unless ( $manu );
-		$serial = $obj->getfirstmatchingkey(\%dmidecode,"system.information.serial.number") unless ( $serial );
-		$model = $obj->getfirstmatchingkey(\%dmidecode,"system.information.product.name") unless ( $model );
-		if ( $manu && $serial && $model ) {
-			$completed = 1;
-			if ( $model =~ /vmware/i ) {
-				$type = "Virtual Server";
-			}
-			else {
-				$type = "Physical Server";
-			}
-		}
+	#
+	# Serial
+	#
+
+	$serial = $dmidecode->getfirstmatchingkey(\%dmidecode,"system.information.serial.number") unless ( $serial );
+
+	if ( $serial ) {
+		$serial =~ s/\s+//g;
 	}
 
-	$inv{manu}=$manu;
-	$inv{type}=$type;
-	$inv{model}=$model;
+	$inv{manu}=$self->trim($manu) if ( $manu );
+	$inv{type}=$self->trim($type) if ( $type );
+	$inv{model}=$self->trim($model) if ( $model );
+	$inv{serial}=$self->trim($serial) if ( $serial );
 
 	return(%inv);
 }
