@@ -183,6 +183,7 @@ sub inventory() {
 	}
 	$inv{domain}=$domain;
 
+	# Maybe include: ansible_virtualization_type
 
 	#
 	# MAC
