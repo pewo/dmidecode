@@ -4,7 +4,9 @@ use strict;
 use Data::Dumper;
 use File::Basename;
 
-use lib ".";
+use FindBin;
+use lib $FindBin::Bin;
+
 use myjson;
 use mydmidecode;
 my($obj) = new myjson;

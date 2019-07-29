@@ -4,7 +4,9 @@ use strict;
 use Carp;
 use Data::Dumper;
 use XML::Parser;
-use lib ".";
+use FindBin;
+use lib $FindBin::Bin;
+
 use HashTools;
 use Object;
 

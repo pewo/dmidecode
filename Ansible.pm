@@ -5,7 +5,9 @@ use Data::Dumper;
 use JSON;
 use Carp;
 
-use lib ".";
+use FindBin;
+use lib $FindBin::Bin;
+
 use Object;
 use HashTools;
 our @ISA = qw(Object HashTools);

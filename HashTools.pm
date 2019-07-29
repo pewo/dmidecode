@@ -4,7 +4,9 @@ use strict;
 use Carp;
 use Data::Dumper;
 use XML::Parser;
-use lib ".";
+use FindBin;
+use lib $FindBin::Bin;
+
 use Object;
 
 $HashTools::VERSION = '0.01';
@@ -89,6 +91,45 @@ sub getfirstmatchingkeyvalue() {
 
 	my($key,$value) = $self->getfirstmatchingkey($hp,@find);
 	return($value, $key);
+}
+
+sub file2hash() {
+	my($self) = shift;
+	my($file) = shift;
+	my($delimiter) = shift || ",";
+
+	return(undef) unless ( $file );
+	return(undef) unless ( -r $file );
+	return(undef) unless ( open(IN,"<$file") );
+	my($header) = scalar <IN>;
+	unless ( $header ) {
+		close(IN);
+		return(undef);
+	}
+	chomp($header);
+
+	my(@header) = ();
+	foreach ( split(/$delimiter/,$header) ) {
+		push(@header,$_);
+	}
+
+	my(@res) = ();
+	my($line);
+	foreach $line ( <IN> ) {
+		chomp($line);
+		#print "Got line [$line]\n";
+		my(%line);
+		my($head);
+		my($value);
+		my(@head) = @header;
+		foreach $value ( split(/$delimiter/,$line) ) {
+			$head = shift(@head);
+			$line{$head}=$value;
+		};
+		push(@res,\%line);
+	}
+	close(IN);
+	return(@res);
 }
 
 1;

@@ -3,7 +3,9 @@ package Fusioninventory_Netinventory;
 use strict;
 use Carp;
 use Data::Dumper;
-use lib ".";
+use FindBin;
+use lib $FindBin::Bin;
+
 use Object;
 
 $Fusioninventory_Netinventory::VERSION = '0.01';

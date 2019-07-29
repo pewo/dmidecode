@@ -4,7 +4,9 @@ use strict;
 use Data::Dumper;
 use NetAddr::IP;
 
-use lib ".";
+use FindBin;
+use lib $FindBin::Bin;
+
 use HashTools;
 
 my($debug) = 1;

@@ -3,7 +3,9 @@ package Dmidecode;
 use strict;
 use Carp;
 use Data::Dumper;
-use lib ".";
+use FindBin;
+use lib $FindBin::Bin;
+
 use HashTools;
 use Object;
 
