@@ -1,3 +1,4 @@
 host;ip;os;descr
 corpappl0001.corp.saab.se;130.100.1.1;Solaris 10;
-corpappl0002.corp.saab.se;130.100.1.2;Centos7;
+corpappl0002.corp.saab.se;192.168.1.2;Centos7;
+corpappl0004.corp.saab.se;20.20.20.20;Centos7;

@@ -2,6 +2,7 @@
 
 use strict;
 use Data::Dumper;
+use NetAddr::IP;
 
 use lib ".";
 use HashTools;
@@ -20,6 +21,7 @@ my($ht) = HashTools->new();
 
 my(%args) = (
 	hosts => { filename => "testdata/hosts.csv" },
+	vlan => { filename => "testdata/vlan.csv" },
 	cmdb   => { filename => "testdata/cmdb.csv", delimiter => ";" },
 	ad  => { filename => "testdata/ad.csv", delimiter => "," },
 	robot  => { filename => "testdata/robot.csv", delimiter => ";" },
@@ -63,6 +65,7 @@ foreach $input ( sort keys %filenames ) {
 	my($header) = scalar <IN>;
 	chomp($header);
 	my(@header) = split(/$delimiter/,$header);
+	my($primarykey) = $header[0];
 	foreach ( <IN> ) {
 		chomp;
 		next if ( m/^#/ );
@@ -72,7 +75,7 @@ foreach $input ( sort keys %filenames ) {
 		foreach ( @header ) {
 			$hash{$_} = shift(@arr);
 		}
-		my($host) = $hash{host};
+		my($host) = $hash{$primarykey};
 		$data{$input}{$host}=\%hash;
 	}
 }
@@ -85,27 +88,92 @@ foreach ( keys %$hostsp ) {
 	push(@hosts,$hp->{host});
 }
 delete($data{hosts});
+print "HOSTS: " . Dumper(\@hosts) if ( $debug > 8 );
+
+my(@vlan);
+my($vlanp) = $data{vlan};
+my($vlanid);
+my(%vlan);
+foreach $vlanid ( keys %$vlanp ) {
+	#print "vlanid: $vlanid\n";
+	my($network) = $vlanp->{$vlanid}{network};
+	next unless ( $network );
+	my $ip  = NetAddr::IP->new($network);
+	next unless ( $ip );
+	$vlan{$vlanid}=$ip;
+}
+delete($data{vlan});
+print "VLAN: " . Dumper(\%vlan) if ( $debug > 8 );
 
 my($cmdb) = $data{cmdb};
-print "CMDB: " . Dumper(\$cmdb);
+print "CMDB: " . Dumper(\$cmdb) if ( $debug > 8 );
 
 my($ad) = $data{ad};
-print "AD: " . Dumper(\$ad);
+print "AD: " . Dumper(\$ad) if ( $debug > 8 );
 
 my($robot) = $data{robot};
-print "ROBOT: " . Dumper(\$robot);
+print "ROBOT: " . Dumper(\$robot) if ( $debug > 8 );
 
 my(%res);
 my($host);
 foreach $host ( sort @hosts ) {
-	print "\nhost: $host\n";
+	#print "\nhost: $host\n";
 	$res{$host}{host}=$host;
-	my($cmdbp) = $ht->getfirstmatchingkeyvalue($cmdb,"^$host");
-	print "cmdb: " . Dumper(\$cmdbp) if ( $cmdbp );
 
-	my($adp) = $ht->getfirstmatchingkeyvalue($ad,"^$host");
-	print "ad: " . Dumper(\$adp) if ( $adp );
+	my($ip) = undef;
+	my($os) = undef;
+	my($descr) = undef;
 
-	my($robotp) = $ht->getfirstmatchingkeyvalue($robot,"^$host");
-	print "robot: " . Dumper(\$robotp) if ( $robotp );
+	my($db);
+	foreach $db ( $robot, $ad, $cmdb ) {
+		print "Ref(\$db): " . ref($db) . "\n" if ( $debug > 8 );
+
+		my($dbp) = $ht->getfirstmatchingkeyvalue($db,"^$host");
+		print "dbp: " . Dumper(\$dbp) if ( $dbp && $debug > 8);
+		$ip = $dbp->{ip} unless ( $ip );
+		$os = $dbp->{os} unless ( $os );
+		$descr = $dbp->{descr} unless ( $descr );
+	}
+
+	$res{$host}{ip}=$ip;
+	$res{$host}{os}=$os;
+	$res{$host}{descr}=$descr;
+	$res{$host}{vlan}="unknown";
+
+	if ( $ip ) {
+		my($net);
+		$net = NetAddr::IP->new($ip);
+		next unless ( $net );
+		my($id);
+		foreach $id ( keys %vlan ) {
+			my($vlannet) = $vlan{$id};
+			if ( $net->within($vlannet) ) {
+				$res{$host}{vlan}=$id
+			}
+		}
+	}
+
 }
+
+my($header) = undef;
+my($res) = undef;
+foreach ( sort keys %res ) {
+	my($hp) = $res{$_};
+	next unless ( $hp );
+	my($key);
+	my($line) = "";
+	foreach $key ( qw(host ip vlan os descr) ) {
+		my($val) = $hp->{$key} || "";
+		$line .= $OFS . $val;
+		$header .= $OFS . $key unless ( $res );
+	}
+	$res = $header . "\n" unless ( $res );
+	$res =~ s/^$OFS//;
+	$line =~ s/^$OFS//;
+	$res .= $line . "\n";
+}
+
+print $res;
+__END__
+	
+print "RES: " . Dumper(\%res);
