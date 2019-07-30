@@ -152,7 +152,7 @@ sub inventory() {
 	#
 	# Ip
 	#
-	my(ip) = undef;
+	my($ip) = undef;
 	my($tip);
 	foreach ( @ifconfig ) {
 		next unless ( m/inet\s+(\d+\.\d+\.\d+\.\d+)\s/ );
