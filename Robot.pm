@@ -84,6 +84,8 @@ sub inventory() {
 	my($dmidecode) = new Dmidecode();
 	my(%dmidecode) = $dmidecode->dmidecode2hash("$dir/dmidecode");
 	my(@uname) = $self->readfile("$dir/uname_-a");
+	my(@cosn) = $self->readfile("$dir/cosn");
+	my(@ifconfig) = $self->readfile("$dir/ifconfig");
 	
 	#
 	# model
@@ -139,10 +141,33 @@ sub inventory() {
 		$serial =~ s/\s+//g;
 	}
 
+	#
+	# Os
+	#
+	my($os) = undef;
+	forach ( @cosn ) {
+		$os = $_;
+	}
+
+	#
+	# Ip
+	#
+	my(ip) = undef;
+	my($tip);
+	foreach ( @ifconfig ) {
+		next unless ( m/inet\s+(\d+\.\d+\.\d+\.\d+)\s/ );
+		$tip = $1;
+		unless ( $tip =~ /^127/ ) {
+			$ip = $tip;
+		}
+	}
+
 	$inv{manu}=$self->trim($manu) if ( $manu );
 	$inv{type}=$self->trim($type) if ( $type );
 	$inv{model}=$self->trim($model) if ( $model );
 	$inv{serial}=$self->trim($serial) if ( $serial );
+	$inv{os}=$self->trim($os) if ( $os );
+	$inv{ip}=$self->trim($ip) if ( $ip );
 
 	return(%inv);
 }
