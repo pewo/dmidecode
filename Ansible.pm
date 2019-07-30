@@ -131,10 +131,10 @@ sub inventory() {
 	my($dir) = $self->get("dir");
 
         my($factsf) = <$dir/$target*>;
-	print "factsf: $factsf\n";
 	if ( ! defined($factsf) ) {
 		return();
 	}
+	#print "factsf: $factsf\n";
 	my(%keys) = $self->json2flathash($factsf);
 
 	my(%inv);
