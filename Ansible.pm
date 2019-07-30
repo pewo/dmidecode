@@ -135,7 +135,7 @@ sub inventory() {
 	if ( ! defined($factsf) ) {
 		return();
 	}
-	#my(%keys) = $self->json2flathash($factsf);
+	my(%keys) = $self->json2flathash($factsf);
 
 	my(%inv);
 	#foreach ( sort keys %keys ) {

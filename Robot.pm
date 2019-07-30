@@ -145,7 +145,7 @@ sub inventory() {
 	# Os
 	#
 	my($os) = undef;
-	forach ( @cosn ) {
+	foreach ( @cosn ) {
 		$os = $_;
 	}
 
