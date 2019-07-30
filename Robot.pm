@@ -85,7 +85,7 @@ sub inventory() {
 	my(%dmidecode) = $dmidecode->dmidecode2hash("$dir/dmidecode");
 	my(@uname) = $self->readfile("$dir/uname_-a");
 	my(@cosn) = $self->readfile("$dir/cosn");
-	my(@ifconfig) = $self->readfile("$dir/ifconfig");
+	my(@ifconfig) = $self->readfile("$dir/ifconfig_-a");
 	
 	#
 	# model
