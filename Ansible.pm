@@ -132,7 +132,10 @@ sub inventory() {
 
         my($factsf) = <$dir/$target*>;
 	print "factsf: $factsf\n";
-	my(%keys) = $self->json2flathash($factsf);
+	if ( ! defined($factsf) ) {
+		return();
+	}
+	#my(%keys) = $self->json2flathash($factsf);
 
 	my(%inv);
 	#foreach ( sort keys %keys ) {
