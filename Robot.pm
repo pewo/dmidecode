@@ -60,12 +60,18 @@ sub readfile() {
 sub dirfinder() {
 	my($self) = shift;
 	my($target) = shift;
-	my($tdir) = $self->get("dir");
-	foreach ( split(/\s|,|;/,$tdir) ) {
+	my($sdir) = $self->get("dir");
+	foreach ( split(/\s|,|;/,$sdir) ) {
 		my($dir) = "$_/$target";
-		#print "dir: $dir\n";
 		return($dir) if ( -d $dir );
+		
+		my(@dirs) = ( <$dir\.*> );
+		($dir) = shift(@dirs);
+		if ( $dir ) {
+			return($dir) if ( -d $dir );
+		}
 	}
+	return(undef);
 }
 
 sub inventory() {
@@ -74,16 +80,9 @@ sub inventory() {
 	#my($odir) = $self->get("dir");
 	#my($dir) = $odir . "/$target";
 	my($dir) = $self->dirfinder($target);
-	return(undef) unless ( $dir );
+	return() unless ( $dir );
 	unless ( -d $dir ) {
-		#my(@dirs) = ( <$odir/$target*> );
-		#my($tdir) = shift(@dirs);
-		#if ( defined($tdir ) ) {
-		#	$dir = $tdir;
-		#}
-	}
-	unless ( -d $dir ) {
-		return(undef);
+		return();
 	}
 
 	my(%inv) = ();
@@ -168,10 +167,18 @@ sub inventory() {
 	my($ip) = undef;
 	my($tip);
 	foreach ( @ifconfig ) {
-		next unless ( m/inet\s+(\d+\.\d+\.\d+\.\d+)\s/ );
-		$tip = $1;
+		if ( m/inet\s+(\d+\.\d+\.\d+\.\d+)\s/ ) {
+			$tip = $1;
+		}
+		elsif ( m/inet\saddr:(\d+\.\d+\.\d+\.\d+)\s/ ) {
+			$tip = $1;
+		}
+		else {
+			next;
+		}
 		unless ( $tip =~ /^127/ ) {
 			$ip = $tip;
+			last;
 		}
 	}
 
