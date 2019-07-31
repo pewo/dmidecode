@@ -65,11 +65,12 @@ sub dirfinder() {
 		my($dir) = "$_/$target";
 		return($dir) if ( -d $dir );
 		
-		my(@dirs) = ( <$dir\.*> );
-		($dir) = shift(@dirs);
-		if ( $dir ) {
-			return($dir) if ( -d $dir );
-		}
+		# Require FQDN or the world will end to exist
+		#my(@dirs) = ( <$dir\.*> );
+		#($dir) = shift(@dirs);
+		#if ( $dir ) {
+		#	return($dir) if ( -d $dir );
+		#}
 	}
 	return(undef);
 }
