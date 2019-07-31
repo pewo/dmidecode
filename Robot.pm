@@ -57,17 +57,30 @@ sub readfile() {
 	return(@res);
 }
 
+sub dirfinder() {
+	my($self) = shift;
+	my($target) = shift;
+	my($tdir) = $self->get("dir");
+	foreach ( split(/\s|,|;/,$tdir) ) {
+		my($dir) = "$_/$target";
+		#print "dir: $dir\n";
+		return($dir) if ( -d $dir );
+	}
+}
+
 sub inventory() {
 	my($self) = shift;
 	my($target) = shift;
-	my($odir) = $self->get("dir");
-	my($dir) = $odir . "/$target";
+	#my($odir) = $self->get("dir");
+	#my($dir) = $odir . "/$target";
+	my($dir) = $self->dirfinder($target);
+	return(undef) unless ( $dir );
 	unless ( -d $dir ) {
-		my(@dirs) = ( <$odir/$target*> );
-		my($tdir) = shift(@dirs);
-		if ( defined($tdir ) ) {
-			$dir = $tdir;
-		}
+		#my(@dirs) = ( <$odir/$target*> );
+		#my($tdir) = shift(@dirs);
+		#if ( defined($tdir ) ) {
+		#	$dir = $tdir;
+		#}
 	}
 	unless ( -d $dir ) {
 		return(undef);

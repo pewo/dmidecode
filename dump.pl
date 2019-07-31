@@ -7,9 +7,9 @@ use lib "dmidecode";
 use Dmidecode;
 use Fusioninventory_Inventory;
 use Robot;
-use Ansible;
+#use Ansible;
 
-my($robdir) = "./curr";
+my($robdir) = "/tmp/robot/curr";
 my($ansdir) = "./ansible_fact_cache";
 my($obj);
 my($target) = shift;
@@ -21,7 +21,7 @@ my(%sum) = ();
 # Robot
 ##################################################
 #print "Robot Inventory\n";
-$obj = new Robot( dir => $robdir );
+$obj = new Robot( dir => "$robdir /tmp/robot/old" );
 {
 	my(%inv) = $obj->inventory($target);
 	foreach ( sort keys %inv ) {
@@ -29,6 +29,8 @@ $obj = new Robot( dir => $robdir );
 		print "$_\t$inv{$_}\n";
 	}
 }
+__END__
+exit;
 
 #print "Ansible Facts\n";
 $obj = new Ansible( dir => $ansdir );
